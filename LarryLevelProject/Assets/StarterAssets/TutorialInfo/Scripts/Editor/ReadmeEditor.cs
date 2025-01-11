@@ -26,21 +26,21 @@ public class ReadmeEditor : Editor {
 			var readme = SelectReadme();
 			SessionState.SetBool(kShowedReadmeSessionStateName, true);
 			
-			if (readme && !readme.loadedLayout)
-			{
-				LoadLayout();
-				readme.loadedLayout = true;
-			}
+			// if (readme && !readme.loadedLayout)
+			// {
+			// 	LoadLayout();
+			// 	readme.loadedLayout = true;
+			// }
 		} 
 	}
 	
-	static void LoadLayout()
-	{
-		var assembly = typeof(EditorApplication).Assembly; 
-		var windowLayoutType = assembly.GetType("UnityEditor.WindowLayout", true);
-		var method = windowLayoutType.GetMethod("LoadWindowLayout", BindingFlags.Public | BindingFlags.Static);
-		method.Invoke(null, new object[]{Path.Combine(Application.dataPath, "TutorialInfo/Layout.wlt"), false});
-	}
+	// static void LoadLayout()
+	// {
+	// 	var assembly = typeof(EditorApplication).Assembly; 
+	// 	var windowLayoutType = assembly.GetType("UnityEditor.WindowLayout", true);
+	// 	var method = windowLayoutType.GetMethod("LoadWindowLayout", BindingFlags.Public | BindingFlags.Static);
+	// 	method.Invoke(null, new object[]{Path.Combine(Application.dataPath, "TutorialInfo/Layout.wlt"), false});
+	// }
 	
 	[MenuItem("Tutorial/Show Tutorial Instructions")]
 	static Readme SelectReadme() 
@@ -66,7 +66,7 @@ public class ReadmeEditor : Editor {
 		var readme = (Readme)target;
 		Init();
 		
-		var iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth/3f - 20f, 128f);
+		var iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth/3f - 20f, 64f);
 		
 		GUILayout.BeginHorizontal("In BigTitle");
 		{
@@ -95,7 +95,13 @@ public class ReadmeEditor : Editor {
 			{
 				if (LinkLabel(new GUIContent(section.linkText)))
 				{
-					Application.OpenURL(section.url);
+					if (!string.IsNullOrEmpty(section.url))
+						Application.OpenURL(section.url);
+					else
+					{
+						var assetPath = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GUIDToAssetPath(section.asset));
+						AssetDatabase.OpenAsset(assetPath);
+					}
 				}
 			}
 			GUILayout.Space(kSpace);
@@ -124,17 +130,19 @@ public class ReadmeEditor : Editor {
 		m_BodyStyle = new GUIStyle(EditorStyles.label);
 		m_BodyStyle.wordWrap = true;
 		m_BodyStyle.fontSize = 14;
+        m_BodyStyle.richText = true;
 		
 		m_TitleStyle = new GUIStyle(m_BodyStyle);
 		m_TitleStyle.fontSize = 26;
 		
 		m_HeadingStyle = new GUIStyle(m_BodyStyle);
+        m_HeadingStyle.fontStyle = FontStyle.Bold;
 		m_HeadingStyle.fontSize = 18 ;
 		
 		m_LinkStyle = new GUIStyle(m_BodyStyle);
 		m_LinkStyle.wordWrap = false;
 		// Match selection color which works nicely for both light and dark skins
-		m_LinkStyle.normal.textColor = new Color (0x00/255f, 0x78/255f, 0xDA/255f, 1f);
+		m_LinkStyle.normal.textColor = new Color (0xFF/255f, 0x77/255f, 0x00/255f, 1f);
 		m_LinkStyle.stretchWidth = false;
 		
 		m_Initialized = true;
